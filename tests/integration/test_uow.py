@@ -66,17 +66,17 @@ def get_allocated_batch_ref(session, orderid, sku):
 
 def test_uow_can_retrieve_a_batch_and_allocate_to_it(session_factory):
     session = session_factory
-    insert_batch(session, "batch1", "HIPSTER-WORKBENCH", 100, None)
+    insert_batch(session, "batch1", "SEABREEZE", 100, None)
     session.commit()
 
     uow = unit_of_work.SqlAlchemyUnitOfWork(session_factory)
     with uow:
-        product = uow.products.get(sku="HIPSTER-WORKBENCH")
-        line = model.OrderLine("o1", "HIPSTER-WORKBENCH", 10)
+        product = uow.products.get(sku="SEABREEZE")
+        line = model.OrderLine("o1", "SEABREEZE", 10)
         product.allocate(line)
         uow.commit()
 
-    batchref = get_allocated_batch_ref(session, "o1", "HIPSTER-WORKBENCH")
+    batchref = get_allocated_batch_ref(session, "o1", "SEABREEZE")
     assert batchref == "batch1"
     session.close()
 
@@ -84,7 +84,7 @@ def test_uow_can_retrieve_a_batch_and_allocate_to_it(session_factory):
 def test_rolls_back_uncommitted_work_by_default(session_factory):
     uow = unit_of_work.SqlAlchemyUnitOfWork(session_factory)
     with uow:
-        insert_batch(uow.session, "batch1", "MEDIUM-PLINTH", 100, None)
+        insert_batch(uow.session, "batch1", "NIGHTCLUB", 100, None)
 
     new_session = session_factory
     rows = list(new_session.execute(text('SELECT * FROM "batches"')))
@@ -100,7 +100,7 @@ def test_rolls_back_on_error(session_factory):
     uow = unit_of_work.SqlAlchemyUnitOfWork(session_factory)
     with pytest.raises(MyException):
         with uow:
-            insert_batch(uow.session, "batch1", "LARGE-FORK", 100, None)
+            insert_batch(uow.session, "batch1", "FOREST", 100, None)
             raise MyException()
 
     new_session = session_factory
